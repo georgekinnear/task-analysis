@@ -1,0 +1,217 @@
+Phase,Course,Assessment,Question ,Marks,Rater1,Rater2 ,Rater3,Rater4,Agreed
+Calibration1,DiagTest,Diagnostic Test,1,5,A3,A3,A3,A3,A3
+Calibration1,DiagTest,Diagnostic Test,2,5,B2,B2,B2,B2,B1
+Calibration1,DiagTest,Diagnostic Test,3a,2,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,3b,1,A2,A2,A2,A2,A2
+Calibration1,DiagTest,Diagnostic Test,3c,2,A3,A3,A3,A3 ,A2
+Calibration1,DiagTest,Diagnostic Test,4,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,5,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,6,5,B1,B1,B1,B1,B1
+Calibration1,DiagTest,Diagnostic Test,7,5,B1,B1,B1,B1,B1
+Calibration1,DiagTest,Diagnostic Test,8,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,9,5,A3,B1,B1,B1,B1
+Calibration1,DiagTest,Diagnostic Test,10,5,A3,A2,A3,A2,C2
+Calibration1,DiagTest,Diagnostic Test,11a,2,A2,A2,A2,A2,A3
+Calibration1,DiagTest,Diagnostic Test,11b,3,A2,A2,A2,A2,C2
+Calibration1,DiagTest,Diagnostic Test,12,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,13,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,14a,2,A3,A3,A3,A3 ,B1
+Calibration1,DiagTest,Diagnostic Test,14b,3,A2,A3,A3,A2,B1
+Calibration1,DiagTest,Diagnostic Test,15,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,16,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,17,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,18,5,A3,A3,A3,A3 ,A3
+Calibration1,DiagTest,Diagnostic Test,19,5,B2,B2,B1,B2,B1
+Calibration1,DiagTest,Diagnostic Test,20,5,B2,A3,B2,B2 ,B2
+Calibration1,DiagTest,Diagnostic Test,Removed 2,5,A3,A3,A3,A3 ,A3 
+Calibration1,DiagTest,Diagnostic Test,Removed 8,5,B1,A3,A3,A3 ,A3 
+Calibration1,DiagTest,Diagnostic Test,Removed 11,5,A3,A3,A3,A3 ,A3 
+Calibration5,ILA,Exam Dec 2018,1,6,A3,A3,A3,A3,A3
+Calibration5,ILA,Exam Dec 2018,2,4,C1,C1,C1,C1,C1
+Calibration5,ILA,Exam Dec 2018,3a,2,B1,B1,B1,B1,B1
+Calibration5,ILA,Exam Dec 2018,3b,2,C2,C2,C2,C2,C2
+Calibration5,ILA,Exam Dec 2018,3c,2,C2,C2,C2,C2,C2
+Calibration5,ILA,Exam Dec 2018,3d,2,B1,B1,B1,B1,B1
+Calibration5,ILA,Exam Dec 2018,4,5,C2,C2,C2,C2,C2
+Calibration5,ILA,Exam Dec 2018,5a,2,A2,A2,A2,A2,A2
+Calibration5,ILA,Exam Dec 2018,5b,2,B1,B1,B1,A2,B1
+Calibration5,ILA,Exam Dec 2018,5c,2,B1,B1,B1,B1,B1
+Calibration5,ILA,Exam Dec 2018,6a,3,A3,A3,A3,A3,A3
+Calibration5,ILA,Exam Dec 2018,6b,3,B1,B1,B1,B1,B1
+Calibration5,ILA,Exam Dec 2018,7a,6,B2,B2,B2,B2,B2
+Calibration5,ILA,Exam Dec 2018,7b,2,A2,A2,A2,A2,A2
+Calibration5,ILA,Exam Dec 2018,7c,7,A3,A3,A3,A3,A3
+Calibration5,ILA,Exam Dec 2018,8a,10,A3,A3,A3,A3,A3
+Calibration5,ILA,Exam Dec 2018,8b,2,A2,A2,A2,A2,A2
+Calibration5,ILA,Exam Dec 2018,8c,3,A3,A3,A3,A3,A3
+Calibration5,ILA,Exam Dec 2018,9a,6,A3,A3,B2,A3,A3
+Calibration5,ILA,Exam Dec 2018,9b,6,A3,A3,A3,A3,A3
+Calibration5,ILA,Exam Dec 2018,9c,3,A2,A2,A2,A2,A2
+Post,ILA,Online1,1,,,,,,B1
+Post,ILA,Online1,2,,,,,,A2
+Post,ILA,Online1,3,,,,,,A3
+Post,ILA,Online1,4,,,,,,A3
+Post,ILA,Online1,5,,,,,,C1
+Post,ILA,Online2,1,,,,,,A3
+Post,ILA,Online2,2,,,,,,A3
+Post,ILA,Online2,3,,,,,,A3
+Post,ILA,Online2,4,,,,,,A3
+Post,ILA,Online2,5,,,,,,B1
+Post,ILA,Online2,6,,,,,,B1
+Post,ILA,Online2,7,,,,,,A3
+Post,ILA,Online3,1,,,,,,A3
+Post,ILA,Online3,2,,,,,,A3
+Post,ILA,Online3,3,,,,,,B1
+Post,ILA,Online3,4,,,,,,C2
+Calibration3,ILA,Online4,1,,A3,A3,,,A2
+Calibration3,ILA,Online4,2,,A3,A3,,,A2
+Calibration3,ILA,Online4,3,,A2,A2,,,B1
+Calibration3,ILA,Online4,4,,A3,B1,,,A2
+Calibration3,ILA,Online4,5,,A3,A3,,,B1
+Calibration3,ILA,Online5,1,,A3,A3,,,A3
+Calibration3,ILA,Online5,2,,A2,A2,,,A2
+Calibration3,ILA,Online5,3,,A3,A3,,,A3
+Calibration3,ILA,Online5,4,,A3,A3,,,B1
+Calibration3,ILA,Online5,5,,A3,A3,,,A3
+Calibration3,ILA,Online5,6,,A3,A3,,,A3
+Calibration3,ILA,Online6,1,,A2,A2,,,A2
+Calibration3,ILA,Online6,2,,A3,A3,,,C2
+Calibration3,ILA,Online6,3,,A3,A3,,,A3
+Calibration3,ILA,Online6,4,,A2,A2,,,B1
+Calibration3,ILA,Online6,5,,A2,A2,,,B1
+Calibration3,ILA,Online6,6,,B1,B1,,,B1
+Calibration4B,ILA,Online7,1,,A3,A3,,,A3
+Calibration4B,ILA,Online7,2,,A3,A3,,,A3
+Calibration4B,ILA,Online7,3,,A3,A3,,,A3
+Calibration4B,ILA,Online7,4,,A3,A3,,,B2
+Calibration4A,ILA,Online8,Q1,,A3,A3,,,A3
+Calibration4A,ILA,Online8,Q2,,A3,A3,,,A3
+Calibration4A,ILA,Online8,Q3,,A3,A3,,,A3
+Calibration4A,ILA,Online8,Q4,,A3,A3,,,A3
+Calibration4A,ILA,Online8,Q5,,B2,B2,,,B2
+Calibration4A,ILA,Online8,Q6,,A3,A3 ,,,A3
+Calibration4A,ILA,Online8,Q7,,C2,C2,,,C2
+Calibration4B,ILA,Online9,1,,A3,A3,,,A3
+Calibration4B,ILA,Online9,2,,A3,A3,,,A3
+Calibration4B,ILA,Online9,3,,A3,A3,,,A3
+Calibration4B,ILA,Online9,4,,A3,A3,,,A3
+Calibration4B,ILA,Online9,5,,C2,C2,,,C2
+Calibration4A,ILA,Reading10A,Q1,,A3,A3,,,A3
+Calibration4A,ILA,Reading10A,Q2,,A2,A2,,,A2
+Post,ILA,Reading10A,1,,,,,,A3
+Post,ILA,Reading10A,2,,,,,,A2
+Calibration4A,ILA,Reading10B,Q1,,A3,A3,,,A3
+Calibration4A,ILA,Reading10B,Q2,,A2,A2,,,A2
+Post,ILA,Reading10B,1,,,,,,A3
+Post,ILA,Reading10B,2,,,,,,A2
+Post,ILA,Reading1A,1,,,,,,A3
+Post,ILA,Reading1A,2,,,,,,A3
+Post,ILA,Reading1B,1,,,,,,A3
+Post,ILA,Reading1B,2,,,,,,A3
+Post,ILA,Reading2A,1,,,,,,A3
+Post,ILA,Reading2A,2,,,,,,A3
+Post,ILA,Reading2B,1,,,,,,A3
+Post,ILA,Reading2B,2,,,,,,A3
+Post,ILA,Reading3A,1,,,,,,A3
+Post,ILA,Reading3A,2,,,,,,A3
+Post,ILA,Reading3B,1,,,,,,A3
+Post,ILA,Reading3B,2,,,,,,A2
+Calibration3,ILA,Reading4A,1,,A2,A2,,,B1
+Calibration3,ILA,Reading4A,2,,A2,A2,,,B1
+Calibration3,ILA,Reading4B,1,,A2,A2,,,B1
+Calibration3,ILA,Reading4B,2,,A3,A3,,,B1
+Calibration3,ILA,Reading4B,3,,A3,A3,,,B1
+Calibration3,ILA,Reading5A,1,,A2,A2,,,A2
+Calibration3,ILA,Reading5A,2,,A3,A3,,,A3
+Calibration3,ILA,Reading5A,3,,A2,A2,,,A2
+Calibration3,ILA,Reading5A,4,,A3,A3,,,B1
+Calibration3,ILA,Reading5B,1,,A3,A3,,,A2
+Calibration3,ILA,Reading5B,2,,A3,A3,,,A3
+Calibration3,ILA,Reading6A,1,,A2,A2,,,A2
+Calibration3,ILA,Reading6A,2,,A3,A3,,,A3
+Calibration3,ILA,Reading6B,1,,A2,A2,,,A2
+Calibration3,ILA,Reading6B,2,,A3,A3,,,B1
+Calibration4B,ILA,Reading7A,1,,A2,A2,,,B1
+Calibration4B,ILA,Reading7A,2,,A2,A2,,,B1
+Calibration4B,ILA,Reading7A,3,,A3,A3,,,A3
+Calibration4B,ILA,Reading7B,1,,A2,A2,,,A2
+Calibration4B,ILA,Reading7B,2,,A3,A3,,,A3
+Calibration4A,ILA,Reading8A,Q1,,A3,A3,,,A3
+Calibration4A,ILA,Reading8A,Q2,,A3,A3,,,A3
+Calibration4A,ILA,Reading8B,Q1,,A2,A2,,,B1
+Calibration4A,ILA,Reading8B,Q2,,B2,B2,,,B1
+Calibration4B,ILA,Reading9A,1,,A2,A2,,,A3
+Calibration4B,ILA,Reading9A,2,,A3,A3,,,A3
+Calibration4B,ILA,Reading9B,1,,B1,B1,,,A2
+Calibration4B,ILA,Reading9B,2,,A2,B1,,,A2
+Calibration1,ILA,Written1,35,5,B1,A3,B1,B1,B1
+Calibration1,ILA,Written1,52a,2.5,A2,B2,A2,A2,B2
+Calibration1,ILA,Written1,52b,2.5,A2,B2,A2,A2,B2
+Calibration1,ILA,Written2,17,5,B2,B2,C2,B2,B2
+Calibration1,ILA,Written2,42,5,C1,C1,C1,C1,B2
+Post,ILA,Written3,40,5,,,,,A3
+Post,ILA,Written3,20,2.5,,,,,B1
+Post,ILA,Written3,24,2.5,,,,,A2
+Calibration3,ILA,Written4,43.a,5,C1,C1,,,C1
+Calibration3,ILA,Written4,43.b,0,C1,C1,,,C1
+Calibration3,ILA,Written4,46,5,B2,C1,,,B2
+Calibration3,ILA,Written5,26,2.5,A3,A3,,,A3
+Calibration3,ILA,Written5,22,2.5,A3,A3,,,A3
+Calibration3,ILA,Written5,44.a,2.5,C2,C2,,,A2
+Calibration3,ILA,Written5,44.b,2.5,B2,B2,,,B2
+Calibration3,ILA,Written6,20,0,A3,A3,,,A3
+Calibration3,ILA,Written6,28,0,A3,A3,,,A3
+Calibration3,ILA,Written6,34,5,B2,B2,,,B2
+Calibration3,ILA,Written6,52,5,A3,A3,,,A3
+Calibration4B,ILA,Written7,8,5,C2,C2,,,C2
+Calibration4B,ILA,Written7,18,0,B1,B1,,,B1
+Calibration4B,ILA,Written7,32,0,A3,A3,,,A3
+Calibration4B,ILA,Written7,53,5,B2,B2,,,B2
+Calibration4A,ILA,Written8,Dec 2013 A4,5,B2,B2,,,B2
+Calibration4A,ILA,Written8,Dec 2014 A4 1),2.5,C2,C2,,,C2
+Calibration4A,ILA,Written8,Dec 2014 A4 2),2.5,C1,B2,,,C1
+Calibration4B,ILA,Written9,B3.a.i,2.5,A3,A3,,,A3
+Calibration4B,ILA,Written9,B3.a.ii,2.5,A3,A3,,,A3
+Calibration4B,ILA,Written9,B3.b.i,1,B2,B2,,,B2
+Calibration4B,ILA,Written9,B3.b.ii,2,B2,B2,,,B2
+Calibration4B,ILA,Written9,B3.b.iii,2,B2,B2,,,B2
+Calibration2,TMUA,2017 P1,1,,A3,A3,A3,A3,A3
+Calibration2,TMUA,2017 P1,2,,A3,A3,A3,A3,A3
+Calibration2,TMUA,2017 P1,3,,B1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P1,4,,B1,A3,A3,A3,A3
+Calibration2,TMUA,2017 P1,5,,A2,A2,A3,A3,B1
+Calibration2,TMUA,2017 P1,6,,B2,B2,B2,B2,B2
+Calibration2,TMUA,2017 P1,7,,B1,B2,B2,B1,B1
+Calibration2,TMUA,2017 P1,8,,A3,A2,A3,B2,B1
+Calibration2,TMUA,2017 P1,9,,B1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P1,10,,A3,A2,A3,A3,A3
+Calibration2,TMUA,2017 P1,11,,B1,B1,A3,A3,A3
+Calibration2,TMUA,2017 P1,12,,C2,C2,C2,C2,C2
+Calibration2,TMUA,2017 P1,13,,A3,A3,A3,A3,A3
+Calibration2,TMUA,2017 P1,14,,B1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P1,15,,B1,B1,B1,A3,B1
+Calibration2,TMUA,2017 P1,16,,A3,A2,A3,A3,B1
+Calibration2,TMUA,2017 P1,17,,B2,B2,B2,B2,B2
+Calibration2,TMUA,2017 P1,18,,B1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P1,19,,B1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P1,20,,B1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P2,1,,A3,A3,A3,A3,A3
+Calibration2,TMUA,2017 P2,2,,B1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P2,3,,A3,A3,A3,A3,A3
+Calibration2,TMUA,2017 P2,4,,C1,C1,C1,C1,C1
+Calibration2,TMUA,2017 P2,5,,C1,C1,C1,C1,C1
+Calibration2,TMUA,2017 P2,6,,B2,B1,B2,B1,A3
+Calibration2,TMUA,2017 P2,7,,B1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P2,8,,A3,A3,A3,A3,A3
+Calibration2,TMUA,2017 P2,9,,C1,C1,C1,C1,C1
+Calibration2,TMUA,2017 P2,10,,C1,C1,C1,C1,C1
+Calibration2,TMUA,2017 P2,11,,B2,B1,B1,B1,B1
+Calibration2,TMUA,2017 P2,12,,C1,B1,B1,B1,B1
+Calibration2,TMUA,2017 P2,13,,C2,C2,C2,C2,C2
+Calibration2,TMUA,2017 P2,14,,A3,B1,B1 ,B1,B1
+Calibration2,TMUA,2017 P2,15,,B2,B1,B1,B1,A3
+Calibration2,TMUA,2017 P2,16,,C2,A2,C1,A2,A2
+Calibration2,TMUA,2017 P2,17,,C2,C2,C2,C2,C2
+Calibration2,TMUA,2017 P2,18,,C1,C1,C1,C1,C1
+Calibration2,TMUA,2017 P2,19,,C1,C1,C1,C1,C1
+Calibration2,TMUA,2017 P2,20,,C2,C2,C2,C2,C2

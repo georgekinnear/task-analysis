@@ -1,0 +1,215 @@
+---
+title: "IRR"
+author: "George Kinnear"
+date: "28/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(irr)
+library(knitr)
+```
+
+## IRR data
+
+Read in the `data_rr.csv` file which contains the ratings by all raters during the various calibration phases.
+
+```{r read-data}
+irr_data = read.csv("data_irr.csv", header = TRUE, stringsAsFactors = FALSE) %>% 
+  mutate(
+    Rater1 = str_trim(Rater1),
+    Rater2 = str_trim(Rater2),
+    Rater3 = str_trim(Rater3),
+    Rater4 = str_trim(Rater4)
+  )
+
+irr_data %>% 
+  head() %>% 
+  kable()
+
+irr_data %>% 
+  group_by(Phase) %>% 
+  tally() %>% 
+  kable()
+```
+
+## Computing Krippendorf's alpha
+
+Here we use the `irr` package.
+
+```{r compute-kripp-alpha}
+do_kripp_alpha_MATH <- function(df) {
+  # df should be a tibble with one column per rater and their ratings in each row
+  kripp.alpha(df %>%
+                # replace A1 etc with unique integers
+                mutate_all(funs(str_replace(., "A", "1"))) %>%
+                mutate_all(funs(str_replace(., "B", "2"))) %>%
+                mutate_all(funs(str_replace(., "C", "3"))) %>%
+                mutate_all(as.numeric) %>%
+                # transpose and convert to a matrix
+                t %>%
+                data.matrix)
+}
+
+kripp_alpha_of_phase <- function(phase) {
+  ka = do_kripp_alpha_MATH(
+    irr_data %>%
+      filter(Phase == phase) %>%
+      select(Rater1:Rater4) # some phases have only Rater1:Rater2 but this
+                            #does not affect the value of kripp.alpha
+  )
+  return(ka$value)
+}
+
+kripp_alpha_of_phase("Calibration4A")
+do_kripp_alpha_MATH(
+  irr_data %>%
+    filter(Phase == "Calibration1") %>%
+    select(Rater1:Rater4)
+)
+do_kripp_alpha_MATH(
+  irr_data %>%
+    filter(Phase == "Calibration2") %>%
+    select(Rater1:Rater4)
+)
+do_kripp_alpha_MATH(
+  irr_data %>%
+    filter(Phase == "Calibration3") %>%
+    select(Rater1:Rater4)
+)
+do_kripp_alpha_MATH(
+  irr_data %>%
+    filter(Phase == "Calibration4A") %>%
+    select(Rater1:Rater2)
+)
+do_kripp_alpha_MATH(
+  irr_data %>%
+    filter(Phase == "Calibration4B") %>%
+    select(Rater1:Rater4)
+)
+do_kripp_alpha_MATH(
+  irr_data %>%
+    filter(Phase == "Calibration5") %>%
+    select(Rater1:Rater4)
+)
+```
+
+## Analysing "Agreed" code
+
+This computes the percentage of items which were recoded to a completely new "Agreed" code at the final stage,
+i.e. not a code that was selected by one of the raters in the original calibration phase.
+
+It also adds Krippendorff alpha scores for each phase.
+
+```{r check-agreed-codes}
+IRR_Results = irr_data %>%
+  mutate(
+    consensus = paste(Rater1,Rater2,Rater3,Rater4),
+    existing_code = if_else(str_detect(consensus,Agreed),"yes","no")
+  ) %>%
+  # Count the number of times a new code was selected
+  select(Phase,existing_code) %>%
+  group_by(Phase,existing_code) %>%
+  count() %>%
+  # Compute the agreement stats
+  group_by(Phase) %>%
+  mutate(
+    num_in_phase = sum(n),
+    pc_of_phase = paste0(format(n / num_in_phase * 100, digits = 0), "%"),
+    kripp = kripp_alpha_of_phase(Phase)
+  ) %>%
+  filter(existing_code == "yes") %>%
+  arrange(existing_code) %>%
+  select(Phase,num_in_phase,kripp,pc_of_phase) %>%
+  ungroup() %>%
+  mutate(
+    Phase = str_replace(Phase, "Calibration", "")
+  )
+
+IRR_Results %>%
+  knitr::kable(#format = "latex",
+               col.names = c("Phase", "Number of questions", "Krippendorf's alpha", "Agreed code among original codes (%)"),
+               digits = 2,
+               booktabs = T)
+```
+
+## Using `irrCAC`
+
+An alternative method, using code from http://www.agreestat.com which is referenced in:
+
+Quarfoot, D., & Levine, R. A. (2016). How Robust Are Multirater Interrater Reliability Indices to Changes in Frequency Distribution?
+The American Statistician, 70(4), 373–384. https://doi.org/10.1080/00031305.2016.1141708
+
+```{r kripp-alpha-v2, results = "asis", echo = FALSE, message = FALSE}
+#source("IRR/agree.coeff3.raw.r")
+library(irrCAC)
+
+for (p in c("Calibration1", "Calibration2","Calibration3","Calibration4A","Calibration4B","Calibration5")) {
+  cat("\n")
+  cat(paste("###",p))
+  cal_data = irr_data %>%
+    filter(Phase == p) %>%
+    select(Rater1:Rater4)
+  bind_rows(
+    gwet.ac1.raw(cal_data)$est,
+    krippen.alpha.raw(cal_data)$est,
+    fleiss.kappa.raw(cal_data)$est
+  ) %>% kable() %>% print()
+  #gwet.ac1.raw(cal_data) %>% print()
+  #krippen.alpha.raw(cal_data) %>% print()
+  #fleiss.kappa.raw(cal_data) %>% print()
+}
+```
+
+### Checking the calculations by hand
+
+The following computations give the values that go into computing the agreement coefficients by hand.
+
+```{r}
+cal3 = irr_data %>%
+  filter(Phase == "Calibration3") %>%
+  select(Rater1:Rater2) %>%
+  mutate(
+    pair1 = paste0(Rater1,Rater2),
+    pair2 = paste0(Rater2,Rater1)
+  )
+
+cal3_pairs = bind_rows(cal3 %>% transmute(pair=pair1), cal3 %>% transmute(pair = pair2))
+
+cal3_pairs %>%
+  group_by(pair) %>%
+  tally()
+```
+
+# Checking cases where there was disagreement
+
+This table shows all questions where there were disagreements between the coders during the calibration phases, along with the agreed code. This helps to see where the most common disagreements arise between particular pairs of codes.
+
+```{r disagreements}
+irr_disagreement_cases = irr_data %>% 
+  gather(Rater1:Rater4, key = "rater", value = "code") %>% 
+  mutate(
+    qid = paste(Assessment, Question)
+  ) %>% 
+  select(Agreed, qid, code) %>% 
+  filter(!code == "") %>% 
+  group_by(qid, Agreed, code) %>% 
+  tally() %>% 
+  group_by(qid, Agreed) %>% 
+  mutate(
+    disagree = n()>1
+  ) %>% 
+  filter(disagree) %>%
+  arrange(qid, code) %>% 
+  summarise(
+    num_chosen = n(),
+    codes = paste0(code, collapse = ",")
+  ) %>% 
+  filter(num_chosen > 1)
+
+irr_disagreement_cases %>% kable(booktabs = T)
+
+```

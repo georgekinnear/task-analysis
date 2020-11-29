@@ -1,6 +1,6 @@
-# MATH 2020
+# MATH 18/19
 
-This was the result of an undergraduate project in the School of Mathematics at the University of Edinburgh.
+This was the result of an undergraduate project in the School of Mathematics at the University of Edinburgh, during the 2018/19 academic year.
 
 The folder contains the data and code needed to reproduce the figures in this paper:
 
