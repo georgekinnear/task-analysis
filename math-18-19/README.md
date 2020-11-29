@@ -4,7 +4,7 @@ This was the result of an undergraduate project in the School of Mathematics at 
 
 The folder contains the data and code needed to reproduce the figures in this paper:
 
-Kinnear, G., Bennett, M., Binnie, R., Bolt, R. and Zheng, Y. (2020). “Reliable application of the MATH taxonomy sheds light on assessment practices”. In: Teaching Mathematics and its Applications: An International Journal of the IMA. hrz017 URL: https://doi.org/10.1093/teamat/hrz017
+> Kinnear, G., Bennett, M., Binnie, R., Bolt, R. and Zheng, Y. (2020). “Reliable application of the MATH taxonomy sheds light on assessment practices”. In: Teaching Mathematics and its Applications: An International Journal of the IMA. hrz017 URL: https://doi.org/10.1093/teamat/hrz017
 
 ## Data
 
@@ -29,3 +29,16 @@ This contains all the coding done throughout the project.
 | Marks | the number of marks allocated to the item |
 | Rater 1/2/3/4 | the MATH code allocated by each of the four raters (in some cases, not all raters rated the items -- these entries are blank) |
 | Agreed | the finally agreed MATH code |
+
+## Code
+
+The analysis code is split across three notebooks:
+
+### [analysis_01_overall.Rmd](analysis_01_overall.Rmd) ([rendered PDF](analysis_01_overall.pdf))
+Main analysis and visualisation of the MATH taxonomy content of each type of exam in the sample. This includes some statistical comparisons between school and university exams.
+
+### [analysis_02_comparing-secondary.Rmd](analysis_02_comparing-secondary.Rmd) ([rendered PDF](analysis_02_comparing-secondary.pdf))
+Further analysis within the set of school exams only.
+
+### [analysis_03_ila.Rmd](analysis_03_ila.Rmd) ([rendered PDF](analysis_03_ila.pdf))
+Further analysis with in the university course, ILA. This combines the data on exams (from `data_math_1819.csv`) with the data on coursework (the agreed codes from `data_irr.csv`).
