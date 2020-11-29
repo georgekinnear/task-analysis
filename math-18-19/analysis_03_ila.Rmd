@@ -1,0 +1,268 @@
+---
+title: "MATH 18/19: Analysis of ILA assessments"
+author: "George Kinnear"
+date: "28/11/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(plyr)
+library(tidyverse)
+library(knitr)
+library(BEST) # for Bayesian estimation in place of t-tests
+```
+
+## Read data
+
+Read in the `data_math-1819.csv` file which contains the codes assigned to all exam questions, and filter to just the ILA ones.
+
+```{r read-data, message=FALSE, warning=FALSE, include=FALSE}
+source(file = here::here("script_read-data.R"))
+
+
+exam_ratings = ratings %>%
+  filter(Course == "ILA")
+
+exam_props = MATH_Group_proportions %>%
+  filter(Course == "ILA") %>%
+  mutate(
+    Week = paste0(Year,Paper),
+    Component = "Exam"
+  ) %>%
+  select(Component, Week, MATH_Group, total_marks_for_Group, total_marks_for_paper, prop_marks)
+
+
+```
+
+Sample of the data:
+
+```{r summary-papers, echo=FALSE}
+exam_props %>% 
+  head() %>% 
+  kable(booktabs = T)
+```
+
+Add the data on coursework, where the ratings were all done in the IRR data file:
+
+```{r data-coursework}
+cw_ratings = read.csv(here::here("data_irr.csv"), header = TRUE, stringsAsFactors = FALSE) %>%
+  filter(
+    Course == "ILA",
+    !str_detect(Assessment, "Exam")
+  ) %>%
+  select(Assessment, Question, Marks, Agreed) %>%
+  mutate(
+    Component = str_sub(Assessment,1,1),
+    Component = case_when(
+      Component == "O" ~ "Online",
+      Component == "W" ~ "Written",
+      Component == "R" ~ "Reading"
+    ),
+    Week = parse_number(Assessment),
+    Item = paste(Assessment, Question),
+    MATH = fct_relevel(fct_expand(as.factor(str_trim(Agreed)), mathcats), mathcats),
+    MATH_Group = as.factor(str_sub(MATH,1,1))
+  ) %>%
+  mutate(
+    Marks = replace_na(Marks, 1)
+  ) %>%
+  # get rid of questions which were coded but had been dropped from Written Assignemnts
+  filter( Marks > 0 ) %>%
+  select(Component, Week, Item, Marks, MATH, MATH_Group) 
+
+cw_ratings %>% 
+  head() %>% 
+  kable(booktabs = T)
+```
+
+
+```{r tab-coursework-totals}
+cw_item_totals = cw_ratings %>%
+  group_by(Component,Week) %>%
+  summarise(
+    total_marks_for_paper = sum(Marks)
+  )
+
+cw_item_totals %>% 
+  pivot_wider(
+    names_from = Component,
+    values_from = total_marks_for_paper
+  ) %>% 
+  kable(booktabs = TRUE, caption = "Total marks in each assessment")
+
+
+cw_MATH_Group_proportions = cw_ratings %>%
+  group_by(Component,Week,MATH_Group) %>%
+  summarise(
+    total_marks_for_Group = sum(Marks)
+  ) %>%
+  # add in the missing "0%" entries
+  complete(nesting(Component,Week),MATH_Group, fill = list(total_marks_for_Group = 0)) %>%
+  left_join(cw_item_totals) %>%
+  ungroup() %>%
+  mutate (
+    prop_marks = total_marks_for_Group / total_marks_for_paper,
+    Week = as.character(Week)
+  ) %>%
+  bind_rows(
+    exam_props
+  )
+
+ILA_components_data = cw_MATH_Group_proportions %>%
+  # reorder the Course factor by mean % group A
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    Component = reorder(Component, gpAmarks, mean)
+  )
+
+ILA_components_data %>% 
+  head() %>% 
+  kable(booktabs = TRUE)
+```
+
+
+# Plots
+
+```{r plot-components-boxplots}
+
+ILA_components_data %>%
+  ggplot(aes(x=1,y=prop_marks, fill=Component)) +
+  geom_boxplot(alpha = 0.3) + 
+  geom_point(aes(colour=Component),
+             position = position_jitterdodge(),
+             size = 1) +
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               shape = 23,
+               size = 3,
+               aes(fill = Component),
+               position = position_dodge(0.8)) +
+  # stat_summary(aes(label=paste0(100*round(..y..,2),"%")),
+  #              fun.y=mean,
+  #              geom="text",
+  #              size=4,
+  #              vjust = -0.5,
+  #              position = position_dodge(0.75)) +
+  geom_text(data = ILA_components_data %>%
+              group_by(Component, MATH_Group) %>%
+              summarise(prop_marks = mean(prop_marks)),
+            aes(label = paste0(100*round(prop_marks,2),"%"),
+                y = -0.05),
+            position = position_dodge(0.75),
+            size = 2.5) + 
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     breaks = seq(0,1,0.1)) +
+  #  scale_fill_brewer(palette = "Set1") +
+  #  scale_colour_brewer(palette = "Set1") +
+  scale_fill_brewer(palette = "RdBu", direction = -1) +
+  scale_colour_brewer(palette = "RdBu", direction = -1) +
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    panel.grid.major.x = element_blank(),
+    strip.background = element_rect(fill=NA,colour = NA),
+    strip.text = element_text(size=10, face="bold", color = "black")
+  ) +
+  labs(
+    #    title = "Proportion of marks in each MATH Group",
+    #    subtitle = "Exams are ordered by proportion of Group A marks",
+    x = "MATH Group",
+    y = "Proportion of marks"
+  ) +
+  facet_grid( ~ MATH_Group, switch = "x") +
+  ggsave("figs/ILA_components_boxplots.pdf",width=15,height=10,units="cm",dpi=300)
+```
+
+
+Using stacked bars:
+
+```{r plot-components-stacked}
+
+ILA_components_data %>%
+  group_by(Component, MATH_Group) %>%
+  summarise(prop_marks = mean(prop_marks)) %>%
+  # compute the positions of the text labels
+  # see http://t-redactyl.io/blog/2016/01/creating-plots-in-r-using-ggplot2-part-4-stacked-bar-plots.html
+  ddply(.(Component), transform, pos = cumsum(prop_marks) - (0.5 * prop_marks)) %>%
+  ggplot(aes(x = Component,
+             y = prop_marks,
+             fill = fct_rev(MATH_Group))) +
+  geom_bar(stat="identity", alpha = 0.9) +
+  geom_text(aes(x = Component, y = pos, label = paste0(sprintf("%.0f",100*prop_marks),"%")),
+            size=4) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0,1,0.1)) +
+  scale_fill_manual(values = palMATH) + 
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 60, hjust = 1)
+  ) +
+  labs(
+    fill = "MATH Group",
+    x = "Component",
+    y = "Proportion of marks"
+  ) +
+  ggsave("figs/ILA_components_stacked.pdf",width=15,height=10,units="cm",dpi=300)
+```
+
+
+# Tables
+
+```{r tab-cat-props}
+cw_MATH_Cat_proportions = cw_ratings %>%
+  group_by(Component,Week,MATH) %>%
+  summarise(
+    total_marks_for_Cat = sum(Marks)
+  ) %>%
+  # add in the missing "0%" entries
+  complete(nesting(Component,Week),MATH, fill = list(total_marks_for_Cat = 0)) %>%
+  ungroup() %>%
+  mutate(
+    # restore the MATH_Group for the "0%" entries
+    Week = as.character(Week),
+    MATH_Group = str_sub(MATH,1,1)
+  ) %>%
+  left_join(cw_MATH_Group_proportions) %>%
+  mutate (
+    prop_marks = total_marks_for_Cat / total_marks_for_Group
+  )
+
+
+ILA_MATH_Cat_props = cw_MATH_Cat_proportions %>%
+  group_by(Component, MATH) %>%
+  summarise(
+    total_Cat = sum(total_marks_for_Cat),
+    total_Group = sum(total_marks_for_Group),
+    prop_of_Group = total_Cat / total_Group * 100
+  )
+ILA_MATH_Cat_props %>% kable(booktabs = TRUE)
+
+```
+
+```{r tabs}
+ILA_MATH_Cat_props %>%
+  select(-total_Cat,-total_Group) %>%
+  spread(MATH, prop_of_Group) %>%
+  knitr::kable(booktabs = T, digits = 0)
+
+ILA_components_data %>%
+  mutate(
+    Coursework = if_else(Component == "Exam", "Exam", "Coursework")
+  ) %>%
+  group_by(Coursework,MATH_Group) %>%
+  summarise(prop_marks = mean(prop_marks)) %>% 
+  pivot_wider(
+    names_from = Coursework,
+    values_from  = prop_marks
+  ) %>% 
+  kable(booktabs = TRUE, digits = 2, caption = "Proportion of marks in each MATH Group, for coursework and exams separately.")
+```
+
+

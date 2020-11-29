@@ -1,0 +1,209 @@
+---
+title: "MATH 18/19: Analysis of differences in school exams"
+author: "George Kinnear"
+date: "28/11/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(plyr)
+library(tidyverse)
+library(knitr)
+library(BEST) # for Bayesian estimation in place of t-tests
+```
+
+## Read data
+
+Read in the `data_math-1819.csv` file which contains the codes assigned to all items, and produce some summaries of this.
+
+```{r read-data, message=FALSE, warning=FALSE, include=FALSE}
+source(file = here::here("script_read-data.R"))
+
+School_props = MATH_Group_proportions %>%
+  mutate(
+    Qual = case_when(
+      str_sub(Course,1,7) == "A-Level" ~ "A-Level",
+      Course == "SQA AH" ~ "SQA AH",
+      Course == "IB HL" ~ "IB HL",
+      TRUE ~ "Other"
+    )
+  ) %>%
+  filter(!Qual == "Other") %>%
+  ungroup()
+```
+
+Sample of the summary data:
+
+```{r summary-papers, echo=FALSE}
+School_props %>% 
+  head() %>% 
+  kable(booktabs = TRUE)
+```
+
+
+
+# Overall proportions
+
+```{r plot-proportions-abc}
+School_props %>%
+  group_by(Qual,MATH_Group) %>%
+  summarise(
+    prop_marks = mean(prop_marks),
+    n = n()
+  ) %>%
+  ungroup() %>%
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    #    Course = paste(Course,"\n(n=",n,")"),
+    Qual = (reorder(Qual, gpAmarks, max))
+  ) %>%
+  ddply(.(Qual), transform, pos = cumsum(prop_marks) - (0.5 * prop_marks)) %>%
+  ggplot(aes(x = Qual,
+             y = prop_marks,
+             fill = fct_rev(MATH_Group))) +
+  geom_bar(stat="identity") +
+  geom_text(aes(x = Qual, y = pos, label = paste0(sprintf("%.0f",100*prop_marks),"%")),
+            size=4) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0,1,0.2)) +
+  scale_fill_manual(values = palMATH) +
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  ) +
+  labs(
+    #    title = "Mean proportion of marks in each MATH Group",
+    fill = "MATH Group",
+    x = "Exam",
+    y = "Proportion of marks"
+  ) +
+  ggsave("figs/ABC_school_means.pdf",width=15,height=10,units="cm",dpi=300)
+
+```
+
+
+In this version, we sort by the mean % of group A, and show the means with diamonds
+
+```{r plot-props-sorted}
+School_props_boxplot_data = School_props %>%
+  # reorder the Qual factor by mean % group A
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    Qual = reorder(Qual, gpAmarks, mean)
+  )
+School_props_boxplot_data %>%
+  ggplot(aes(x=1,y=prop_marks, fill=Qual)) +
+  geom_boxplot(alpha = 0.3) + 
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               shape = 23,
+               size = 3,
+               aes(fill = Qual),
+               position = position_dodge(0.8)) +
+  geom_point(aes(colour=Qual),
+             position = position_jitterdodge(),
+             size = 1) +
+  geom_text(data = School_props_boxplot_data %>%
+              group_by(Qual, MATH_Group) %>%
+              summarise(prop_marks = mean(prop_marks)),
+            aes(label = paste0(100*round(prop_marks,2),"%"),
+                y = -0.05),
+            position = position_dodge(0.75),
+            size = 2.5) + 
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     breaks = seq(0,1,0.1)) +
+    scale_fill_manual(values = palMATH) +
+    scale_colour_manual(values = palMATH) +
+#  scale_fill_brewer(palette = "RdBu", direction = -1) +
+#  scale_colour_brewer(palette = "RdBu", direction = -1) +
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    panel.grid.major.x = element_blank(),
+    strip.background = element_rect(fill=NA,colour = NA),
+    strip.text = element_text(size=10, face="bold", color = "black")
+  ) +
+  labs(
+    #    title = "Proportion of marks in each MATH Group",
+    #    subtitle = "Exams are ordered by proportion of Group A marks",
+    fill = "Qualification",
+    colour = "Qualification",
+    x = "MATH Group",
+    y = "Proportion of marks"
+  ) +
+  facet_grid( ~ MATH_Group, switch = "x") +
+  ggsave("figs/ABC_school_boxplots.pdf",width=15,height=10,units="cm",dpi=300)
+```
+
+
+# Comparisons
+
+## SQA AH and A-Level
+
+```{r stats-bayes-ah-alevel}
+sp = School_props %>%
+  filter(MATH_Group == "A") %>%
+  select(Qual, prop_marks)
+
+BESTout = BESTmcmc(sp %>% filter(Qual=="SQA AH") %>% select(prop_marks) %>% data.matrix,
+                   sp %>% filter(Qual=="A-Level") %>% select(prop_marks) %>% data.matrix)
+BESTout
+summary(BESTout) %>% kable(booktabs = T)
+plot(BESTout)
+plot(BESTout, "sd")
+plotPostPred(BESTout)
+plotAll(BESTout, credMass=0.95, ROPEm=c(-0.1,0.1),
+        ROPEeff=c(-0.2,0.2), compValm=0.5)
+pairs(BESTout)
+
+```
+
+This shows a mean difference of `r formathdi(summary(BESTout),"muDiff",2)`.
+
+## SQA AH and IB
+
+```{r stats-bayes-ah-ib}
+BESToutIB = BESTmcmc(sp %>% filter(Qual=="SQA AH") %>% select(prop_marks) %>% data.matrix,
+                   sp %>% filter(Qual=="IB HL") %>% select(prop_marks) %>% data.matrix)
+plotAll(BESToutIB, credMass=0.95)
+```
+
+This shows a mean difference of `r formathdi(summary(BESToutIB),"muDiff",2)`.
+
+## Overall summary
+
+```{r stats-allquals-means}
+School_props %>%
+  group_by(Qual, MATH_Group) %>%
+  summarise(
+    m = mean(prop_marks),
+    sd = sd(prop_marks),
+    n = n()
+  ) %>%
+  ungroup() %>%
+  arrange(MATH_Group) %>% 
+  kable(booktabs = TRUE)
+```
+
+
+## SQA AH and A-Level, Group C
+
+```{r stats-bayes-ah-alevel-gp-c}
+school_gpC = School_props %>%
+  filter(MATH_Group == "C") %>%
+  select(Qual, prop_marks)
+
+BESTout = BESTmcmc(school_gpC %>% filter(Qual=="SQA AH") %>% select(prop_marks) %>% data.matrix,
+                   school_gpC %>% filter(Qual=="A-Level") %>% select(prop_marks) %>% data.matrix)
+BESTout
+summary(BESTout) %>% kable(booktabs = T)
+```
+
+This shows a mean difference of `r formathdi(summary(BESTout),"muDiff",2)`.

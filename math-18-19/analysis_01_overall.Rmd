@@ -1,0 +1,582 @@
+---
+title: "MATH 18/19: Overall analysis"
+author: "George Kinnear"
+date: "28/11/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(plyr)
+library(tidyverse)
+library(knitr)
+library(BEST) # for Bayesian estimation in place of t-tests
+```
+
+## Read data
+
+Read in the `data_math-1819.csv` file which contains the codes assigned to all items, and produce some summaries of this.
+
+```{r read-data, message=FALSE, warning=FALSE, include=FALSE}
+source(file = here::here("script_read-data.R"))
+
+Course_totals = ratings %>%
+  group_by(Course) %>%
+  summarise(
+    total_question = n(),
+    total_marks = sum(Marks)
+  )
+
+```
+
+Summary of papers in the sample:
+
+```{r summary-papers, echo=FALSE}
+MATH_Group_proportions %>%
+  group_by(Course, Year) %>%
+  tally() %>% 
+  group_by(Course) %>% 
+  summarise(
+    num_papers = n_distinct(Year),
+    papers = paste0(Year, collapse = ", ")
+  ) %>% 
+  left_join(Course_totals) %>% 
+  kable(booktabs = TRUE)
+
+Course_totals %>%
+  ungroup() %>%
+  summarise(
+    totalqs = sum(total_question),
+    totalmarks = sum(total_marks)
+  ) %>% 
+  kable(booktabs = TRUE)
+```
+
+
+
+# Overall proportions
+
+```{r plot-proportions}
+MATH_Group_proportions %>%
+  # reorder the Course factor by max % group A
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    Course = reorder(Course, gpAmarks, max)
+  ) %>%
+  ggplot(aes(x=1,y=prop_marks, fill=Course)) +
+  geom_boxplot(alpha = 0.4) + 
+  geom_point(aes(colour=Course),
+             position = position_jitterdodge(),
+             size = 1) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     breaks = seq(0,1,0.1)) +
+  scale_fill_brewer(palette = "RdBu", direction = -1) +
+  scale_colour_brewer(palette = "RdBu", direction = -1) +
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    panel.grid.major.x = element_blank(),
+    strip.background = element_rect(fill=NA,colour = NA),
+    strip.text = element_text(size=10, face="bold", color = "black")
+  ) +
+  labs(
+#    title = "Proportion of marks in each MATH Group",
+#    subtitle = "Exams are ordered by proportion of Group A marks",
+    x = "MATH Group",
+    y = "Proportion of marks"
+  ) +
+  facet_grid( ~ MATH_Group, switch = "x") +
+  ggsave("figs/ABC_allpapers_ranking.pdf",width=15,height=10,units="cm",dpi=300)
+
+```
+
+
+In this version, we sort by the mean % of group A, and show the means with diamonds
+
+```{r plot-props-sorted}
+MATH_Group_proportions %>%
+  # reorder the Course factor by mean % group A
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    Course = reorder(Course, gpAmarks, mean)
+  ) %>%
+  ggplot(aes(x=1,y=prop_marks, fill=Course)) +
+  geom_boxplot(alpha = 0.3) + 
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               shape = 23,
+               size = 3,
+               aes(fill = Course),
+               position = position_dodge(0.8)) +
+  geom_point(aes(colour=Course),
+             position = position_jitterdodge(),
+             size = 1) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     breaks = seq(0,1,0.1)) +
+  #  scale_fill_brewer(palette = "Set1") +
+  #  scale_colour_brewer(palette = "Set1") +
+  scale_fill_brewer(palette = "RdBu", direction = -1) +
+  scale_colour_brewer(palette = "RdBu", direction = -1) +
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    panel.grid.major.x = element_blank(),
+    strip.background = element_rect(fill=NA,colour = NA),
+    strip.text = element_text(size=10, face="bold", color = "black")
+  ) +
+  labs(
+    #    title = "Proportion of marks in each MATH Group",
+    #    subtitle = "Exams are ordered by proportion of Group A marks",
+    x = "MATH Group",
+    y = "Proportion of marks"
+  ) +
+  facet_grid( ~ MATH_Group, switch = "x") +
+  ggsave("figs/ABC_allpapers_boxplots.pdf",width=15,height=10,units="cm",dpi=300)
+```
+
+Here we group courses at different education levels
+
+```{r plot-props-grouped}
+gpAschooluni = MATH_Group_proportions %>%
+  # reorder the Course factor by mean % group A
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    Course = reorder(Course, gpAmarks, mean),
+    CourseGroup = case_when(
+      Course %in% c("TMUA P1", "TMUA P2", "DiagTest") ~ "Admission",
+      Course == "ILA" ~ "University",
+      TRUE ~ "School"
+    )
+  ) %>%
+  filter( MATH_Group == "A" ) %>%
+  select(Course, Year, Paper, total_marks_for_Group, total_marks_for_paper, prop_marks, CourseGroup)
+
+gpAschooluni %>% 
+  ggplot(aes(x=1,y=prop_marks)) +
+  geom_boxplot(alpha = 0.3) + 
+  stat_summary(fun.y = "mean",
+               geom = "point",
+               shape = 23,
+               size = 3) +
+  geom_point(aes(colour=Course),
+             size = 1,
+             position = position_jitter(0.2)) +
+  #  geom_text(aes(label=Course)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     breaks = seq(0,1,0.1),
+                     limits = c(0,1)) +
+  #  scale_fill_brewer(palette = "Set1") +
+  #  scale_colour_brewer(palette = "Set1") +
+  scale_fill_brewer(palette = "RdBu", direction = -1) +
+  scale_colour_brewer(palette = "RdBu", direction = -1) +
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x=element_blank(),
+    axis.ticks.x=element_blank(),
+    panel.grid.major.x = element_blank(),
+    strip.background = element_rect(fill=NA,colour = NA),
+    strip.text = element_text(size=10, face="bold", color = "black")
+  ) +
+  labs(
+    #    title = "Proportion of marks in each MATH Group",
+    #    subtitle = "Exams are ordered by proportion of Group A marks",
+    x = "Exam Level",
+    y = "Proportion of marks in MATH Group A"
+  ) +
+  facet_grid( ~ CourseGroup, switch = "x") +
+  ggsave("figs/A_mean_school_vs_uni.pdf",width=15,height=10,units="cm",dpi=300)
+
+
+```
+
+## Statistical comparisons
+
+
+### t-test comparison by level
+
+```{r stats-t-test-levels}
+gpAschool = gpAschooluni %>% filter(CourseGroup=="School") %>% select(prop_marks) %>% data.matrix
+gpA_Alevel = gpAschooluni %>% filter(str_detect(Course, "A-Level")) %>% select(prop_marks) %>% data.matrix
+gpAuni = gpAschooluni %>% filter(Course=="ILA") %>% select(prop_marks) %>% data.matrix
+
+t.test(gpAschool, gpAuni)
+t.test(gpA_Alevel, gpAuni)
+```
+
+### Bayesian comparison
+
+```{r stats-bayes-levels}
+BESTout = BESTmcmc(gpAschool,gpAuni)
+BESTout
+summary(BESTout)
+```
+
+This gives the mean proportion of group A:
+
+* for school exams, `r formathdi(summary(BESTout),"mu1",2)`
+* for university exams, `r formathdi(summary(BESTout),"mu2",2)`
+
+The difference between these is `r formathdi(summary(BESTout),"muDiff",2)`.
+
+Here are some more diagostic plots for this summary:
+
+```{r stats-bayes-levels-detail}
+plot(BESTout)
+plot(BESTout, "sd")
+plotPostPred(BESTout)
+plotAll(BESTout, credMass=0.95, ROPEm=c(-0.1,0.1),
+        ROPEeff=c(-0.2,0.2), compValm=0.5)
+pairs(BESTout)
+```
+
+Looking at university versus A-Level in particular:
+
+```{r stats-bayes-alevel-vs-uni}
+BESTout_Alevel = BESTmcmc(gpA_Alevel,gpAuni)
+summary(BESTout_Alevel)
+plotAll(BESTout_Alevel, credMass=0.95, ROPEm=c(-0.1,0.1),
+        ROPEeff=c(-0.2,0.2), compValm=0.5)
+```
+
+# Details of each paper
+
+Stacked bars of ABC proprtion by exam paper
+
+```{r plot-abc-stacked-bars}
+math_stacked_bars <- function(course_name) {
+  MATH_Group_proportions %>%
+    filter(Course == course_name) %>%
+    # compute the positions of the text labels
+    # see http://t-redactyl.io/blog/2016/01/creating-plots-in-r-using-ggplot2-part-4-stacked-bar-plots.html
+    ddply(.(Course,Exam), transform, pos = cumsum(prop_marks) - (0.5 * prop_marks)) %>%
+    ggplot(aes(x = Exam,
+               y = prop_marks,
+               fill = fct_rev(MATH_Group))) +
+    geom_bar(stat="identity", alpha = 0.9) +
+    geom_text(aes(x = Exam, y = 1-pos, label = paste0(sprintf("%.0f",100*prop_marks),"%")),
+              size=4) +
+    scale_y_continuous(labels = scales::percent,
+                       breaks = seq(0,1,0.1)) +
+    scale_fill_manual(values = palMATH) + 
+    theme_light(base_size = 12)+
+    theme(
+      panel.grid.minor = element_blank(),
+      axis.text.x = element_text(angle = 60, hjust = 1)
+    ) +
+    labs(
+      title = paste(course_name, "by year"),
+      fill = "MATH Group",
+      x = "Exam",
+      y = "Proportion of marks"
+    )
+}
+math_stacked_bars("ILA")
+math_stacked_bars("SQA AH")
+math_stacked_bars("IB HL")
+#math_stacked_bars("A-Level C1-C4")
+#math_stacked_bars("A-Level FP3")
+```
+
+Do them all in one big plot, using facets:
+
+```{r plot-abc-props-facets, fig.asp=1.2}
+MATH_Group_proportions %>%
+  filter(!Course %in% c("DiagTest", "TMUA")) %>%
+  ddply(.(Course,Exam), transform, pos = cumsum(prop_marks) - (0.5 * prop_marks)) %>%
+  ggplot(aes(x = Exam,
+             y = prop_marks,
+             fill = fct_rev(MATH_Group))) +
+  geom_bar(stat="identity", alpha = 0.9) +
+  geom_text(aes(x = Exam, y = 1-pos, label = paste0(sprintf("%.0f",100*prop_marks),"%")),
+            size=2) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0,1,0.2)) +
+  scale_fill_manual(values = palMATH) + 
+  theme_light(base_size = 10)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(size = rel(0.7), angle = 30, hjust = 1),
+    strip.background = element_rect(fill=NA,colour = NA),
+    strip.text = element_text(size=10, face="bold", color = "black"),
+    legend.position="bottom"
+  ) +
+  labs(
+    fill = "MATH Group",
+    x = "Exam",
+    y = "Proportion of marks"
+  ) +
+  facet_wrap( ~ Course, ncol = 2, scales = "free") +
+  ggsave("figs/ABC_allpapers_facets.pdf",width=15,height=20,units="cm",dpi=300)
+```
+
+
+
+
+A version of Darlington 2015 Fig 2/3:
+
+```{r plot-abc-school-vs-uni}
+MATH_Group_proportions %>%
+  filter(!Course %in% c("TMUA", "DiagTest")) %>%
+  ungroup() %>%
+  group_by(Course,MATH_Group) %>%
+  summarise(
+    prop_marks = mean(prop_marks),
+    n = n()
+  ) %>%
+  ungroup() %>%
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+#    Course = paste(Course,"\n(n=",n,")"),
+    Course = (reorder(Course, gpAmarks, max))
+  ) %>%
+  ddply(.(Course), transform, pos = cumsum(prop_marks) - (0.5 * prop_marks)) %>%
+  ggplot(aes(x = Course,
+             y = prop_marks,
+             fill = fct_rev(MATH_Group))) +
+  geom_bar(stat="identity", alpha = 0.9) +
+  geom_text(aes(x = Course, y = pos, label = paste0(sprintf("%.0f",100*prop_marks),"%")),
+            size=4) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0,1,0.2)) +
+  scale_fill_manual(values = palMATH) + 
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  ) +
+  labs(
+#    title = "Mean proportion of marks in each MATH Group",
+    fill = "MATH Group",
+    x = "Exam",
+    y = "Proportion of marks"
+  ) +
+  ggsave("figs/ABC_school_and_ILA_means.pdf",width=15,height=10,units="cm",dpi=300)
+
+```
+
+
+Try using facets to show school vs university:
+
+```{r plot-school-vs-uni-facets}
+MATH_Group_proportions %>%
+  ungroup() %>%
+  group_by(Course,MATH_Group) %>%
+  summarise(
+    prop_marks = mean(prop_marks),
+    n = n()
+  ) %>%
+  ungroup() %>%
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    #    Course = paste(Course,"\n(n=",n,")"),
+    Course = (reorder(Course, gpAmarks, max)),
+    CourseGroup = if_else(Course %in% c("TMUA", "DiagTest", "ILA"), "University", "School")
+  ) %>%
+  ddply(.(Course), transform, pos = cumsum(prop_marks) - (0.5 * prop_marks)) %>%
+  ggplot(aes(x = Course,
+             y = prop_marks,
+             fill = fct_rev(MATH_Group))) +
+  geom_bar(stat="identity", alpha = 0.9) +
+  geom_text(aes(x = Course, y = pos, label = paste0(sprintf("%.0f",100*prop_marks),"%")),
+            size=4) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0,1,0.2)) +
+  scale_fill_manual(values = palMATH) +
+  facet_wrap( ~ CourseGroup, ncol = 2, scales = "free") +
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 30, hjust = 1),
+    strip.background = element_rect(fill=NA,colour = NA),
+    strip.text = element_text(size=10, face="bold", color = "black")
+  ) +
+  labs(
+    #    title = "Mean proportion of marks in each MATH Group",
+    fill = "MATH Group",
+    x = "Exam",
+    y = "Proportion of marks"
+  ) +
+  ggsave("figs/ABC_school_vs_other_means.pdf",width=15,height=10,units="cm",dpi=300)
+```
+
+Showing the school/uni distinction using opacity:
+
+```{r plot-school-vs-uni-alpha}
+MATH_Group_proportions %>%
+  ungroup() %>%
+  group_by(Course,MATH_Group) %>%
+  summarise(
+    prop_marks = mean(prop_marks),
+    n = n()
+  ) %>%
+  ungroup() %>%
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    #    Course = paste(Course,"\n(n=",n,")"),
+    Course = (reorder(Course, gpAmarks, max)),
+    CourseGroup = if_else(Course %in% c("TMUA P1", "TMUA P2", "DiagTest", "ILA"), "University", "School")
+  ) %>%
+  ddply(.(Course), transform, pos = cumsum(prop_marks) - (0.5 * prop_marks)) %>%
+  ggplot(aes(x = Course,
+             y = prop_marks,
+             fill = fct_rev(MATH_Group))) +
+  geom_bar(stat="identity",
+           aes(alpha = CourseGroup)) +
+  geom_text(aes(x = Course, y = pos, label = paste0(sprintf("%.0f",100*prop_marks),"%")),
+            size=4) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0,1,0.2)) +
+  scale_fill_manual(values = palMATH) +
+  scale_alpha_manual("Exam Level", values = c("School" = 0.9, "University" = 0.4)) +
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  ) +
+  labs(
+    #    title = "Mean proportion of marks in each MATH Group",
+    fill = "MATH Group",
+    x = "Exam",
+    y = "Proportion of marks"
+  ) +
+  ggsave("figs/ABC_all_means.pdf",width=15,height=10,units="cm",dpi=300)
+```
+
+Focusing on school exams:
+
+```{r plot-school-means}
+MATH_Group_proportions %>%
+  filter(!Course %in% c("TMUA", "DiagTest", "ILA")) %>%
+  ungroup() %>%
+  group_by(Course,MATH_Group) %>%
+  summarise(
+    prop_marks = mean(prop_marks),
+    n = n()
+  ) %>%
+  ungroup() %>%
+  mutate(
+    gpAmarks = if_else(MATH_Group=="A",prop_marks,0),
+    #    Course = paste(Course,"\n(n=",n,")"),
+    Course = (reorder(Course, gpAmarks, max))
+  ) %>%
+  ddply(.(Course), transform, pos = cumsum(prop_marks) - (0.5 * prop_marks)) %>%
+  ggplot(aes(x = Course,
+             y = prop_marks,
+             fill = fct_rev(MATH_Group))) +
+  geom_bar(stat="identity", alpha = 0.9) +
+  geom_text(aes(x = Course, y = pos, label = paste0(sprintf("%.0f",100*prop_marks),"%")),
+            size=4) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0,1,0.2)) +
+  scale_fill_manual(values = palMATH) + 
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  ) +
+  labs(
+    #    title = "Mean proportion of marks in each MATH Group",
+    fill = "MATH Group",
+    x = "Exam",
+    y = "Proportion of marks"
+  ) +
+  ggsave("figs/ABC_school_means.pdf",width=15,height=10,units="cm",dpi=300)
+```
+
+# Detailed MATH categories
+
+Like Darlington (2014) Fig 1 - looking in detail at the MATH categories.
+
+```{r tab-math-cats-detail}
+MATH_Cat_proportions = ratings %>%
+  group_by(Course,Year,Paper,MATH_Group,MATH) %>%
+  summarise(
+    total_marks_for_Cat = sum(Marks)
+  ) %>%
+  ungroup() %>%
+  # add in the missing "0%" entries
+  complete(nesting(Course,Year,Paper),MATH, fill = list(total_marks_for_Cat = 0)) %>%
+  mutate(
+    # restore the MATH_Group for the "0%" entries
+    MATH_Group = str_sub(MATH,1,1)
+  ) %>%
+  left_join(MATH_Group_proportions) %>%
+  mutate (
+    prop_marks_cat = total_marks_for_Cat / total_marks_for_Group
+  ) %>%
+  ungroup()
+
+MATH_Cat_props_by_Course = MATH_Cat_proportions %>%
+  group_by(Course, MATH) %>%
+  summarise(
+    total_Cat = sum(total_marks_for_Cat),
+    total_Group = sum(total_marks_for_Group),
+    prop_of_Group = total_Cat / total_Group * 100
+  )
+
+MATH_Cat_props_by_Course %>%
+  select(-total_Cat,-total_Group) %>%
+  spread(MATH, prop_of_Group) %>%
+  knitr::kable(booktabs = T, digits = 0)
+  
+```
+
+
+```{r plot-math-cats-detail}
+MATH_Cat_props_by_Course %>%
+  filter( str_sub(MATH,1,1) == "A") %>%
+  ungroup() %>%
+  mutate(
+    Course = (reorder(Course, prop_of_Group, max)),
+    CourseGroup = if_else(Course %in% c("TMUA", "DiagTest", "ILA"), "University", "School"),
+    MATH = fct_recode(MATH, FKFS = "A1", COMP = "A2", RUOP = "A3"),
+    prop_of_Group = prop_of_Group / 100
+  ) %>%
+  ddply(.(Course), transform, pos = cumsum(prop_of_Group) - (0.5 * prop_of_Group)) %>%
+  ggplot(aes(x = Course,
+             y = prop_of_Group,
+             fill = fct_rev(MATH),
+             alpha = CourseGroup)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(x = Course,
+                y = pos,
+                label = if_else(prop_of_Group <0.01,
+                                "",
+                                paste0(sprintf("%.0f",100*prop_of_Group),"%"))
+                ),
+            size = 4,
+            alpha = 1) +
+  scale_alpha_manual("Exam Level", values = c("School" = 0.9, "University" = 0.5)) +
+  scale_y_continuous(labels = scales::percent,
+                     breaks = seq(0,1,0.2)) +
+  scale_fill_manual(values = rev(c(palMATH[3],"#d6604d","#f4a582"))) + 
+  theme_light(base_size = 12)+
+  theme(
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 30, hjust = 1)
+  ) +
+  labs(
+    #    title = "Mean proportion of marks in each MATH Group",
+    fill = "MATH Category",
+    x = "Exam",
+    y = "Proportion of Group A marks"
+  ) +
+  ggsave("figs/A_breakdown.pdf",width=15,height=10,units="cm",dpi=300)
+```
+
+
+
+
+
+
+
+
+
